@@ -1,0 +1,12 @@
+services:
+  chrome:
+    image: acedroidx/alpine-chrome-extra-plugin
+    container_name: chrome
+    volumes:
+      - chrome-data:/app/puppeteer
+    ports:
+      - 9222:9222
+
+volumes:
+  chrome-data:
+    name: chrome-data

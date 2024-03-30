@@ -1,0 +1,7 @@
+compose.yml
+compose-*.yml
+node_modules
+log
+backup
+dist
+data
