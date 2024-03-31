@@ -3,23 +3,23 @@ ARG IMAGE_TAG=dev
 FROM node:18-alpine AS build
 WORKDIR /app
 ENV TZ=Asia/Shanghai \
-    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_SKIP_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
-RUN npm install -g pnpm@8.12.0 && npm cache clean --force
+RUN npm install -g pnpm@8.15.5 && npm cache clean --force
 COPY pnpm-lock.yaml ./
 RUN pnpm fetch
 COPY package.json tsconfig.json index.ts ./
 RUN pnpm install --offline
 RUN pnpm run build
 
-FROM zenika/alpine-chrome:119
+FROM zenika/alpine-chrome:123
 WORKDIR /app
 ENV TZ=Asia/Shanghai \
-    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_SKIP_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 USER root
 RUN apk add --no-cache nodejs npm socat
-RUN chown -R chrome /app ; npm install -g pnpm@8.12.0 && npm cache clean --force
+RUN chown -R chrome /app ; npm install -g pnpm@8.15.5 && npm cache clean --force
 USER chrome
 COPY --chown=chrome pnpm-lock.yaml ./
 RUN pnpm fetch --prod

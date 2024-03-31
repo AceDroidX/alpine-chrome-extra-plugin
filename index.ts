@@ -32,7 +32,7 @@ async function getBrowser() {
             "--no-sandbox",
             "--disable-dev-shm-usage",
         ],
-        headless: "new",
+        headless: true,
     });
 }
 
