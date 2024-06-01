@@ -1,23 +1,15 @@
 {
     "name": "alpine-chrome-extra-plugin",
-    "version": "1.0.0",
-    "description": "Tests with puppeteer",
-    "main": "index.js",
-    "scripts": {
-        "start": "node --enable-source-maps dist/index.js",
-        "test": "node dist/test.js",
-        "clean": "tsc --build --clean",
-        "dev": "nodemon src/index.ts",
-        "build": "tsc",
-        "serve": "ts-node src/index.ts"
-    },
+    "module": "index.ts",
+    "type": "module",
     "license": "MIT",
+    "devDependencies": {
+        "@types/bun": "latest",
+        "typescript": "^5.0.0"
+    },
     "dependencies": {
-        "puppeteer": "22.6.1",
+        "puppeteer": "22.10.0",
         "puppeteer-extra": "^3.3.6",
         "puppeteer-extra-plugin-stealth": "^2.11.2"
-    },
-    "devDependencies": {
-        "typescript": "^5.4.3"
     }
 }

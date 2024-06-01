@@ -9,12 +9,11 @@ async function getBrowser() {
         var exepath = "/usr/bin/google-chrome";
     } else if (fs.existsSync("/usr/bin/chromium-browser")) {
         var exepath = "/usr/bin/chromium-browser";
+        // } else {
+        //     if (process.platform === "win32") {
+        //         var exepath = String.raw`D:\cli-tools\win64-991974\chrome-win\chrome.exe`;
     } else {
-        if (process.platform === "win32") {
-            var exepath = String.raw`D:\cli-tools\win64-991974\chrome-win\chrome.exe`;
-        } else {
-            var exepath = "";
-        }
+        var exepath = "";
     }
     return await puppeteer.launch({
         // pipe: true,
@@ -40,9 +39,11 @@ async function main() {
     const browser = await getBrowser();
     console.info(await browser.userAgent());
     console.info("Started debuggingPort: 9222");
-    while (true) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
+    // while (browser.connected) {
+    //     await new Promise((resolve) => setTimeout(resolve, 1000));
+    //     console.info("Running...");
+    // }
+    // console.info("Disconnected");
 }
 
 main();
