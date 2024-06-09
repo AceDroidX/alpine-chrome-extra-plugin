@@ -15,12 +15,19 @@ async function getBrowser() {
     } else {
         var exepath = "";
     }
+    const dataDir = process.platform === "win32" ? "./data/puppeteer" : "/app/puppeteer"
+    try {
+        const lstat = await fs.lstatSync(dataDir + "/SingletonLock")
+        if (lstat.isSymbolicLink()) {
+            fs.rmSync(dataDir + "/SingletonLock", { force: true });
+            console.info("Removed SingletonLock");
+        }
+    } catch (e) {
+        console.info("No SingletonLock");
+    }
     return await puppeteer.launch({
         // pipe: true,
-        userDataDir:
-            process.platform === "win32"
-                ? "./data/puppeteer"
-                : "/app/puppeteer",
+        userDataDir: dataDir,
         executablePath: exepath,
         // args: ['--no-sandbox', "--single-process", "--no-zygote", '--disable-dev-shm-usage'],
         // args: ['--no-sandbox', '--disable-setuid-sandbox',
