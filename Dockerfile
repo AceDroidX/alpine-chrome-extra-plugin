@@ -33,7 +33,7 @@ ENV NODE_ENV=production
 
 # https://github.com/jlandure/alpine-chrome/blob/master/Dockerfile
 
-FROM alpine:3.19 AS chrome
+FROM alpine:3.21.3 AS chrome
 
 # Installs latest Chromium package.
 RUN apk upgrade --no-cache --available \
