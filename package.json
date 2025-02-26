@@ -8,8 +8,8 @@
         "typescript": "^5.0.0"
     },
     "dependencies": {
-        "puppeteer": "24.3.0",
-        "puppeteer-extra": "^3.3.6",
-        "puppeteer-extra-plugin-stealth": "^2.11.2"
+        "chrome-launcher": "^1.1.2",
+        "rebrowser-puppeteer": "23.10.3",
+        "xvfb": "^0.4.0"
     }
 }

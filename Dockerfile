@@ -75,7 +75,7 @@ ENV BUN_RUNTIME_TRANSPILER_CACHE_PATH=${BUN_RUNTIME_TRANSPILER_CACHE_PATH}
 # ARG BUN_INSTALL_BIN=/usr/local/bin
 # ENV BUN_INSTALL_BIN=${BUN_INSTALL_BIN}
 USER root
-RUN apk add --no-cache curl wget bash socat
+RUN apk add --no-cache curl wget bash socat xvfb
 # https://github.com/oven-sh/bun/blob/main/dockerhub/alpine/Dockerfile
 RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.34-r0/glibc-2.34-r0.apk && \
     wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.34-r0/glibc-bin-2.34-r0.apk && \
@@ -89,6 +89,7 @@ COPY --chown=chrome --from=prerelease /app/index.ts /app/wrap.sh ./
 RUN mkdir /app/puppeteer && chown chrome:chrome /app/puppeteer
 VOLUME /app/puppeteer
 EXPOSE 9222/tcp
+ENV DISPLAY=:7
 #https://stackoverflow.com/questions/47088261/restarting-an-unhealthy-docker-container-based-on-healthcheck/64041910#64041910
 #HEALTHCHECK --interval=5m --timeout=2m --start-period=45s \
 #   CMD curl -f --retry 6 --max-time 5 --retry-delay 10 --retry-max-time 60 "http://localhost:8080/health" || bash -c 'kill -s 15 -1 && (sleep 10; kill -s 9 -1)'
