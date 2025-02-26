@@ -1,6 +1,6 @@
 # use the official Bun image
 # see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:1 as base
+FROM oven/bun:1 AS base
 WORKDIR /app
 ENV TZ=Asia/Shanghai \
     PUPPETEER_SKIP_DOWNLOAD=true \
@@ -31,7 +31,38 @@ ENV NODE_ENV=production
 # RUN bun run build
 # RUN bun x prisma generate
 
-FROM zenika/alpine-chrome:124 AS release
+# https://github.com/jlandure/alpine-chrome/blob/master/Dockerfile
+
+FROM alpine:3.19 AS chrome
+
+# Installs latest Chromium package.
+RUN apk upgrade --no-cache --available \
+    && apk add --no-cache \
+      chromium-swiftshader \
+      ttf-freefont \
+      font-noto-emoji \
+    && apk add --no-cache \
+      --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
+      font-wqy-zenhei
+
+COPY local.conf /etc/fonts/local.conf
+
+# Add Chrome as a user
+RUN mkdir -p /usr/src/app \
+    && adduser -D chrome \
+    && chown -R chrome:chrome /usr/src/app
+# Run Chrome as non-privileged
+USER chrome
+WORKDIR /usr/src/app
+
+ENV CHROME_BIN=/usr/bin/chromium-browser \
+    CHROME_PATH=/usr/lib/chromium/
+
+# Autorun chrome headless
+ENV CHROMIUM_FLAGS="--disable-software-rasterizer --disable-dev-shm-usage"
+ENTRYPOINT ["chromium-browser", "--headless"]
+
+FROM chrome AS release
 WORKDIR /app
 ENV TZ=Asia/Shanghai \
     PUPPETEER_SKIP_DOWNLOAD=true \
@@ -58,4 +89,7 @@ COPY --chown=chrome --from=prerelease /app/index.ts /app/wrap.sh ./
 RUN mkdir /app/puppeteer && chown chrome:chrome /app/puppeteer
 VOLUME /app/puppeteer
 EXPOSE 9222/tcp
+#https://stackoverflow.com/questions/47088261/restarting-an-unhealthy-docker-container-based-on-healthcheck/64041910#64041910
+#HEALTHCHECK --interval=5m --timeout=2m --start-period=45s \
+#   CMD curl -f --retry 6 --max-time 5 --retry-delay 10 --retry-max-time 60 "http://localhost:8080/health" || bash -c 'kill -s 15 -1 && (sleep 10; kill -s 9 -1)'
 ENTRYPOINT ["sh", "wrap.sh"]
