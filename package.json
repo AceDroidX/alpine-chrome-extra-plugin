@@ -4,12 +4,13 @@
     "type": "module",
     "license": "MIT",
     "devDependencies": {
-        "@types/bun": "latest",
-        "typescript": "^5.0.0"
+        "@tsconfig/node-ts": "^23.6.1",
+        "@tsconfig/node24": "^24.0.1",
+        "@types/node": "^24.8.1"
     },
     "dependencies": {
-        "chrome-launcher": "^1.1.2",
-        "rebrowser-puppeteer": "23.10.3",
+        "chrome-launcher": "^1.2.1",
+        "rebrowser-puppeteer": "24.8.1",
         "xvfb": "^0.4.0"
     }
 }

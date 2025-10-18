@@ -1,8 +1,10 @@
 compose.yml
 compose-*.yml
-.git
 node_modules
 log
 backup
 dist
 data
+.pnpm-store
+
+.git
