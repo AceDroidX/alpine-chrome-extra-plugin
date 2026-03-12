@@ -52,7 +52,8 @@ RUN if [ "$USE_CHINA_MIRROR" = "true" ]; then \
 COPY local.conf /etc/fonts/local.conf
 
 RUN useradd --create-home --shell /bin/bash chrome \
-    && mkdir -p /app /app/puppeteer \
+    && mkdir -p /app /app/puppeteer /tmp/.X11-unix \
+    && chmod 1777 /tmp /tmp/.X11-unix \
     && chown -R chrome:chrome /app
 
 USER chrome
