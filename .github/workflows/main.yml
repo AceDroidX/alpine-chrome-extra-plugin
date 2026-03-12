@@ -22,9 +22,20 @@ jobs:
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       -
-        name: Build and push
+        name: Build and push default image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
+            ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:default
+      -
+        name: Build and push vnc image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          build-args: |
+            ENABLE_NOVNC=true
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:vnc

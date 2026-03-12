@@ -33,11 +33,15 @@ npm config set registry https://registry.npmmirror.com
 ## Run
 
 ```bash
-docker run --rm -p 9222:9222 alpine-chrome-extra-plugin
-docker run --rm -p 9222:9222 -p 6080:6080 alpine-chrome-extra-plugin
+docker run --rm -p 9222:9222 your-user/alpine-chrome-extra-plugin:latest
+docker run --rm -p 9222:9222 your-user/alpine-chrome-extra-plugin:default
+docker run --rm -p 9222:9222 -p 6080:6080 your-user/alpine-chrome-extra-plugin:vnc
 ```
 
-Only the image built with `ENABLE_NOVNC=true` serves noVNC. Then open `http://localhost:6080/vnc.html` to view the browser.
+Published tags:
+
+- `:latest` and `:default` are the standard image without noVNC
+- `:vnc` includes noVNC and serves `http://localhost:6080/vnc.html`
 
 ## Compose
 
