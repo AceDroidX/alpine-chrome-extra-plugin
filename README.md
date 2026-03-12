@@ -1,5 +1,5 @@
 # alpine-chrome-extra-plugin
-[alpine-chrome](https://github.com/Zenika/alpine-chrome) inspired Chromium container, now based on `node:24-trixie-slim`, with [puppeteer-real-browser](https://github.com/ZFC-Digital/puppeteer-real-browser)
+[alpine-chrome](https://github.com/Zenika/alpine-chrome) inspired Google Chrome container, now based on `node:24-trixie-slim`, with [puppeteer-real-browser](https://github.com/ZFC-Digital/puppeteer-real-browser)
 
 thanks [rebrowser-puppeteer](https://github.com/rebrowser/rebrowser-puppeteer)
 
@@ -8,6 +8,7 @@ Using socat to [fix --headless=new](https://github.com/Zenika/alpine-chrome/issu
 ## Features
 
 - Chrome can optionally expose noVNC at `http://localhost:6080/vnc.html`
+- Browser binary is downloaded from `https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb`
 - Chrome DevTools remains reachable at `http://localhost:9222`
 - Docker build can switch Debian package sources with `USE_CHINA_MIRROR=true`
 - When `USE_CHINA_MIRROR=true`, npm and pnpm use `https://registry.npmmirror.com`

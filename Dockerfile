@@ -6,7 +6,7 @@ ARG USE_CHINA_MIRROR
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=Asia/Shanghai \
     PUPPETEER_SKIP_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 WORKDIR /app
 RUN if [ "$USE_CHINA_MIRROR" = "true" ]; then \
         sed -i 's|http://deb.debian.org/debian|http://mirrors.ustc.edu.cn/debian|g; s|http://deb.debian.org/debian-security|http://mirrors.ustc.edu.cn/debian-security|g' /etc/apt/sources.list.d/debian.sources; \
@@ -35,16 +35,18 @@ RUN if [ "$USE_CHINA_MIRROR" = "true" ]; then \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
         bash \
-        chromium \
         dumb-init \
         fonts-noto-color-emoji \
         fonts-wqy-zenhei \
         socat \
         xvfb \
         wget \
+    && wget -O /tmp/google-chrome-stable_current_amd64.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && apt-get install -y --no-install-recommends /tmp/google-chrome-stable_current_amd64.deb \
     && if [ "$ENABLE_NOVNC" = "true" ]; then \
         apt-get install -y --no-install-recommends novnc websockify x11vnc; \
     fi \
+    && rm -f /tmp/google-chrome-stable_current_amd64.deb \
     && rm -rf /var/lib/apt/lists/*
 
 COPY local.conf /etc/fonts/local.conf
@@ -56,8 +58,8 @@ RUN useradd --create-home --shell /bin/bash chrome \
 USER chrome
 WORKDIR /app
 
-ENV CHROME_BIN=/usr/bin/chromium \
-    CHROME_PATH=/usr/lib/chromium/chromium \
+ENV CHROME_BIN=/usr/bin/google-chrome \
+    CHROME_PATH=/opt/google/chrome/chrome \
     CHROMIUM_FLAGS="--disable-software-rasterizer --disable-dev-shm-usage" \
     DISPLAY=:7 \
     ENABLE_NOVNC=${ENABLE_NOVNC} \
