@@ -1,77 +1,65 @@
 ARG USE_CHINA_MIRROR=false
 ARG ENABLE_NOVNC=false
 
-FROM node:24.10-alpine AS base
+FROM node:24-trixie-slim AS base
 ARG USE_CHINA_MIRROR
-WORKDIR /app
-ENV TZ=Asia/Shanghai \
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=Asia/Shanghai \
     PUPPETEER_SKIP_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
-RUN if [ "$USE_CHINA_MIRROR" = "true" ]; then sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories; fi \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+WORKDIR /app
+RUN if [ "$USE_CHINA_MIRROR" = "true" ]; then \
+        sed -i 's|http://deb.debian.org/debian|http://mirrors.ustc.edu.cn/debian|g; s|http://deb.debian.org/debian-security|http://mirrors.ustc.edu.cn/debian-security|g' /etc/apt/sources.list.d/debian.sources; \
+        npm config set registry https://registry.npmmirror.com; \
+    fi \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/* \
     && npm install -g pnpm@10.18.3 \
-    && npm cache clean --force
+    && npm cache clean --force \
+    && rm -rf /var/lib/apt/lists/*
 
 FROM base AS build
-COPY pnpm-lock.yaml ./
+COPY pnpm-lock.yaml package.json ./
 RUN pnpm fetch --prod
 COPY . .
 RUN pnpm install --offline --prod
 
-# https://github.com/jlandure/alpine-chrome/blob/master/Dockerfile
-
-FROM base AS chrome
+FROM base AS release
 ARG USE_CHINA_MIRROR
-
-# Installs latest Chromium package.
-RUN if [ "$USE_CHINA_MIRROR" = "true" ]; then COMMUNITY_REPO_BASE=https://mirrors.ustc.edu.cn/alpine; else COMMUNITY_REPO_BASE=https://dl-cdn.alpinelinux.org/alpine; fi \
-    && ALPINE_VERSION=$(cut -d. -f1,2 /etc/alpine-release) \
-    && COMMUNITY_REPO="$COMMUNITY_REPO_BASE/v${ALPINE_VERSION}/community" \
-    && apk upgrade --no-cache --available \
-    && apk add --no-cache \
-      chromium-swiftshader \
-      ttf-freefont \
-      font-noto-emoji \
-    && apk add --no-cache \
-      --repository="$COMMUNITY_REPO" \
-      font-wqy-zenhei
+ARG ENABLE_NOVNC
+ENV DEBIAN_FRONTEND=noninteractive
+RUN if [ "$USE_CHINA_MIRROR" = "true" ]; then \
+        sed -i 's|http://deb.debian.org/debian|http://mirrors.ustc.edu.cn/debian|g; s|http://deb.debian.org/debian-security|http://mirrors.ustc.edu.cn/debian-security|g' /etc/apt/sources.list.d/debian.sources; \
+    fi \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        bash \
+        chromium \
+        dumb-init \
+        fonts-noto-color-emoji \
+        fonts-wqy-zenhei \
+        socat \
+        xvfb \
+        wget \
+    && if [ "$ENABLE_NOVNC" = "true" ]; then \
+        apt-get install -y --no-install-recommends novnc websockify x11vnc; \
+    fi \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY local.conf /etc/fonts/local.conf
 
-# Add Chrome as a user
-RUN mkdir -p /usr/src/app \
-    && adduser -D chrome \
-    && chown -R chrome:chrome /usr/src/app
-# Run Chrome as non-privileged
+RUN useradd --create-home --shell /bin/bash chrome \
+    && mkdir -p /app /app/puppeteer \
+    && chown -R chrome:chrome /app
+
 USER chrome
-WORKDIR /usr/src/app
-
-ENV CHROME_BIN=/usr/bin/chromium-browser \
-    CHROME_PATH=/usr/lib/chromium/
-
-# Autorun chrome headless
-ENV CHROMIUM_FLAGS="--disable-software-rasterizer --disable-dev-shm-usage"
-ENTRYPOINT ["chromium-browser"]
-
-FROM chrome AS release
 WORKDIR /app
-USER root
-ARG USE_CHINA_MIRROR
-ARG ENABLE_NOVNC
-RUN if [ "$USE_CHINA_MIRROR" = "true" ]; then COMMUNITY_REPO_BASE=https://mirrors.ustc.edu.cn/alpine; else COMMUNITY_REPO_BASE=https://dl-cdn.alpinelinux.org/alpine; fi \
-    && ALPINE_VERSION=$(cut -d. -f1,2 /etc/alpine-release) \
-    && COMMUNITY_REPO="$COMMUNITY_REPO_BASE/v${ALPINE_VERSION}/community" \
-    && apk add --no-cache curl wget bash socat xvfb \
-    && if [ "$ENABLE_NOVNC" = "true" ]; then apk add --no-cache x11vnc novnc websockify --repository="$COMMUNITY_REPO"; fi
-RUN chown -R chrome /app ;
-USER chrome
-COPY --chown=chrome --from=build /app/node_modules node_modules
-COPY --chown=chrome --from=build /app/index.ts /app/wrap.sh ./
-RUN sed -i 's/\r$//' /app/wrap.sh \
-    && mkdir /app/puppeteer \
-    && chown chrome:chrome /app/puppeteer
-VOLUME /app/puppeteer
-EXPOSE 9222/tcp
-ENV DISPLAY=:7 \
+
+ENV CHROME_BIN=/usr/bin/chromium \
+    CHROME_PATH=/usr/lib/chromium/chromium \
+    CHROMIUM_FLAGS="--disable-software-rasterizer --disable-dev-shm-usage" \
+    DISPLAY=:7 \
     ENABLE_NOVNC=${ENABLE_NOVNC} \
     VNC_PORT=5900 \
     NOVNC_PORT=6080 \
@@ -79,7 +67,11 @@ ENV DISPLAY=:7 \
     XVFB_WHD=1336x768x24 \
     CHROME_DEBUG_PORT=9221 \
     DEVTOOLS_PORT=9222
-#https://stackoverflow.com/questions/47088261/restarting-an-unhealthy-docker-container-based-on-healthcheck/64041910#64041910
-#HEALTHCHECK --interval=5m --timeout=2m --start-period=45s \
-#   CMD curl -f --retry 6 --max-time 5 --retry-delay 10 --retry-max-time 60 "http://localhost:8080/health" || bash -c 'kill -s 15 -1 && (sleep 10; kill -s 9 -1)'
-ENTRYPOINT ["sh", "wrap.sh"]
+
+COPY --chown=chrome:chrome --from=build /app/node_modules ./node_modules
+COPY --chown=chrome:chrome --from=build /app/index.ts /app/wrap.sh ./
+RUN sed -i 's/\r$//' /app/wrap.sh
+
+VOLUME /app/puppeteer
+EXPOSE 9222/tcp
+ENTRYPOINT ["dumb-init", "--", "sh", "wrap.sh"]

@@ -9,6 +9,8 @@ const chromeWindowSize = process.env.CHROME_WINDOW_SIZE ?? "1336,768";
 async function startBrowser() {
     if (fs.existsSync("/usr/bin/google-chrome")) {
         var exepath = "/usr/bin/google-chrome";
+    } else if (fs.existsSync("/usr/bin/chromium")) {
+        var exepath = "/usr/bin/chromium";
     } else if (fs.existsSync("/usr/bin/chromium-browser")) {
         var exepath = "/usr/bin/chromium-browser";
         // } else {

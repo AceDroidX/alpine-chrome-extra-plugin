@@ -1,5 +1,5 @@
 # alpine-chrome-extra-plugin
-[alpine-chrome](https://github.com/Zenika/alpine-chrome) with [puppeteer-real-browser](https://github.com/ZFC-Digital/puppeteer-real-browser)
+[alpine-chrome](https://github.com/Zenika/alpine-chrome) inspired Chromium container, now based on `node:24-trixie-slim`, with [puppeteer-real-browser](https://github.com/ZFC-Digital/puppeteer-real-browser)
 
 thanks [rebrowser-puppeteer](https://github.com/rebrowser/rebrowser-puppeteer)
 
@@ -9,7 +9,8 @@ Using socat to [fix --headless=new](https://github.com/Zenika/alpine-chrome/issu
 
 - Chrome can optionally expose noVNC at `http://localhost:6080/vnc.html`
 - Chrome DevTools remains reachable at `http://localhost:9222`
-- Docker build can switch Alpine package sources with `USE_CHINA_MIRROR=true`
+- Docker build can switch Debian package sources with `USE_CHINA_MIRROR=true`
+- When `USE_CHINA_MIRROR=true`, npm and pnpm use `https://registry.npmmirror.com`
 - Docker build enables noVNC only when `ENABLE_NOVNC=true`
 
 ## Build
@@ -21,10 +22,11 @@ docker build -t alpine-chrome-extra-plugin --build-arg ENABLE_NOVNC=true .
 docker build -t alpine-chrome-extra-plugin --build-arg USE_CHINA_MIRROR=true --build-arg ENABLE_NOVNC=true .
 ```
 
-When `USE_CHINA_MIRROR=true`, the image build runs:
+When `USE_CHINA_MIRROR=true`, the image build rewrites Debian apt sources to USTC mirrors and switches npm to `https://registry.npmmirror.com`:
 
 ```sh
-sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+sed -i 's|http://deb.debian.org/debian|http://mirrors.ustc.edu.cn/debian|g; s|http://deb.debian.org/debian-security|http://mirrors.ustc.edu.cn/debian-security|g' /etc/apt/sources.list.d/debian.sources
+npm config set registry https://registry.npmmirror.com
 ```
 
 ## Run
