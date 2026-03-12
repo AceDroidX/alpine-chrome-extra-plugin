@@ -71,9 +71,11 @@ ENV CHROME_BIN=/usr/bin/google-chrome \
     DEVTOOLS_PORT=9222
 
 COPY --chown=chrome:chrome --from=build /app/node_modules ./node_modules
-COPY --chown=chrome:chrome --from=build /app/index.ts /app/wrap.sh ./
-RUN sed -i 's/\r$//' /app/wrap.sh
+COPY --chown=chrome:chrome --from=build /app/index.ts ./index.ts
+COPY --chown=chrome:chrome --from=build /app/wrap.sh ./wrap.sh
+RUN sed -i 's/\r$//' /app/wrap.sh \
+    && chmod 755 /app/wrap.sh
 
 VOLUME /app/puppeteer
 EXPOSE 9222/tcp
-ENTRYPOINT ["dumb-init", "--", "sh", "wrap.sh"]
+ENTRYPOINT ["dumb-init", "--", "/app/wrap.sh"]
