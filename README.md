@@ -1,4 +1,6 @@
 # alpine-chrome-extra-plugin
+**English** | [简体中文](README.zh.md)
+
 [alpine-chrome](https://github.com/Zenika/alpine-chrome) inspired Google Chrome container, now based on `node:24-trixie-slim`, with [puppeteer-real-browser](https://github.com/ZFC-Digital/puppeteer-real-browser)
 
 thanks [rebrowser-puppeteer](https://github.com/rebrowser/rebrowser-puppeteer)
