@@ -2,6 +2,10 @@ import { launch, Launcher } from "chrome-launcher";
 import fs from "fs";
 import puppeteer from "rebrowser-puppeteer";
 
+const chromeDebugPort = Number(process.env.CHROME_DEBUG_PORT ?? 9221);
+const devtoolsPort = Number(process.env.DEVTOOLS_PORT ?? 9222);
+const chromeWindowSize = process.env.CHROME_WINDOW_SIZE ?? "1336,768";
+
 async function startBrowser() {
     if (fs.existsSync("/usr/bin/google-chrome")) {
         var exepath = "/usr/bin/google-chrome";
@@ -44,10 +48,11 @@ async function startBrowser() {
         // "--headless=new",
         "--no-sandbox",
         "--disable-dev-shm-usage",
+        `--window-size=${chromeWindowSize}`,
     ];
     return await launch({
         ignoreDefaultFlags: true,
-        port: 9221,
+        port: chromeDebugPort,
         userDataDir: dataDir,
         chromePath: exepath,
         chromeFlags,
@@ -61,7 +66,7 @@ async function main() {
         browserURL: `http://localhost:${browser.port}`,
     });
     console.info(await client.userAgent());
-    console.info("Started debuggingPort: 9222");
+    console.info(`Started debuggingPort: ${devtoolsPort}`);
     // while (browser.connected) {
     //     await new Promise((resolve) => setTimeout(resolve, 1000));
     //     console.info("Running...");
