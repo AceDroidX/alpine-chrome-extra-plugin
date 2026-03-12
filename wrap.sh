@@ -28,15 +28,17 @@ PIDS="$PIDS $!"
 sleep 2
 require_running "$!" "Xvfb"
 
-x11vnc -display "$DISPLAY" -forever -shared -nopw -rfbport "$VNC_PORT" -listen 0.0.0.0 -xkb >/tmp/x11vnc.log 2>&1 &
-PIDS="$PIDS $!"
-sleep 1
-require_running "$!" "x11vnc"
+if [ "${ENABLE_NOVNC:-false}" = "true" ]; then
+    x11vnc -display "$DISPLAY" -forever -shared -nopw -rfbport "$VNC_PORT" -listen 0.0.0.0 -xkb >/tmp/x11vnc.log 2>&1 &
+    PIDS="$PIDS $!"
+    sleep 1
+    require_running "$!" "x11vnc"
 
-websockify --web /usr/share/novnc 0.0.0.0:"$NOVNC_PORT" 127.0.0.1:"$VNC_PORT" >/tmp/websockify.log 2>&1 &
-PIDS="$PIDS $!"
-sleep 1
-require_running "$!" "websockify"
+    websockify --web /usr/share/novnc 0.0.0.0:"$NOVNC_PORT" 127.0.0.1:"$VNC_PORT" >/tmp/websockify.log 2>&1 &
+    PIDS="$PIDS $!"
+    sleep 1
+    require_running "$!" "websockify"
+fi
 
 socat TCP-LISTEN:"$DEVTOOLS_PORT",fork,reuseaddr TCP:127.0.0.1:"$CHROME_DEBUG_PORT" >/tmp/socat.log 2>&1 &
 PIDS="$PIDS $!"

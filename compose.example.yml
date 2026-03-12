@@ -6,11 +6,13 @@ services:
       context: .
       args:
         USE_CHINA_MIRROR: "false"
+        ENABLE_NOVNC: "false"
     volumes:
       - chrome-data:/app/puppeteer
     ports:
       - 9222:9222
-      - 6080:6080
+      # Enable when build.args.ENABLE_NOVNC is "true"
+      # - 6080:6080
 
 volumes:
   chrome-data:

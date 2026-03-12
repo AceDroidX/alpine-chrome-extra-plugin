@@ -1,4 +1,5 @@
 ARG USE_CHINA_MIRROR=false
+ARG ENABLE_NOVNC=false
 
 FROM node:24.10-alpine AS base
 ARG USE_CHINA_MIRROR
@@ -55,19 +56,23 @@ FROM chrome AS release
 WORKDIR /app
 USER root
 ARG USE_CHINA_MIRROR
+ARG ENABLE_NOVNC
 RUN if [ "$USE_CHINA_MIRROR" = "true" ]; then COMMUNITY_REPO_BASE=https://mirrors.ustc.edu.cn/alpine; else COMMUNITY_REPO_BASE=https://dl-cdn.alpinelinux.org/alpine; fi \
     && ALPINE_VERSION=$(cut -d. -f1,2 /etc/alpine-release) \
     && COMMUNITY_REPO="$COMMUNITY_REPO_BASE/v${ALPINE_VERSION}/community" \
-    && apk add --no-cache curl wget bash socat xvfb x11vnc novnc websockify --repository="$COMMUNITY_REPO"
+    && apk add --no-cache curl wget bash socat xvfb \
+    && if [ "$ENABLE_NOVNC" = "true" ]; then apk add --no-cache x11vnc novnc websockify --repository="$COMMUNITY_REPO"; fi
 RUN chown -R chrome /app ;
 USER chrome
 COPY --chown=chrome --from=build /app/node_modules node_modules
 COPY --chown=chrome --from=build /app/index.ts /app/wrap.sh ./
-RUN mkdir /app/puppeteer && chown chrome:chrome /app/puppeteer
+RUN sed -i 's/\r$//' /app/wrap.sh \
+    && mkdir /app/puppeteer \
+    && chown chrome:chrome /app/puppeteer
 VOLUME /app/puppeteer
 EXPOSE 9222/tcp
-EXPOSE 6080/tcp
 ENV DISPLAY=:7 \
+    ENABLE_NOVNC=${ENABLE_NOVNC} \
     VNC_PORT=5900 \
     NOVNC_PORT=6080 \
     XVFB_SCREEN=0 \
