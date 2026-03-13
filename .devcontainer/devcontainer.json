@@ -7,7 +7,30 @@
 		"context": "..",
 		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
 		"dockerfile": "./Dockerfile"
-	}
+	},
+	"mounts": [
+		{
+			"source": "opencode_share",
+			"target": "/root/.local/share/opencode",
+			"type": "volume"
+		},
+		{
+			"source": "opencode_config",
+			"target": "/root/.config/opencode",
+			"type": "volume"
+		},
+		{
+			"source": "opencode_cache",
+			"target": "/root/.cache/opencode",
+			"type": "volume"
+		},
+		{
+			"source": "opencode_state",
+			"target": "/root/.local/state/opencode",
+			"type": "volume"
+		}
+	],
+	"postCreateCommand": "npm install -g opencode-ai"
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
