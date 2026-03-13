@@ -1,10 +1,14 @@
 import { launch, Launcher } from "chrome-launcher";
 import fs from "fs";
+import path from "path";
 import puppeteer from "rebrowser-puppeteer";
+import { fileURLToPath } from "url";
 
 const chromeDebugPort = Number(process.env.CHROME_DEBUG_PORT ?? 9221);
 const devtoolsPort = Number(process.env.DEVTOOLS_PORT ?? 9222);
 const chromeWindowSize = process.env.CHROME_WINDOW_SIZE ?? "1336,768";
+const appRoot =
+    process.env.APP_ROOT ?? path.dirname(fileURLToPath(import.meta.url));
 
 async function startBrowser() {
     if (fs.existsSync("/usr/bin/google-chrome")) {
@@ -20,11 +24,17 @@ async function startBrowser() {
         var exepath = "D:\\Program\\Google\\Chrome\\Application\\chrome.exe";
     }
     const dataDir =
-        process.platform === "win32" ? "./data/puppeteer" : "/app/puppeteer";
+        process.platform === "win32"
+            ? path.join(appRoot, "data", "puppeteer")
+            : path.join(appRoot, "puppeteer");
+    const singletonLockPath = path.join(dataDir, "SingletonLock");
+
+    fs.mkdirSync(dataDir, { recursive: true });
+
     try {
-        const lstat = await fs.lstatSync(dataDir + "/SingletonLock");
+        const lstat = fs.lstatSync(singletonLockPath);
         if (lstat.isSymbolicLink()) {
-            fs.rmSync(dataDir + "/SingletonLock", { force: true });
+            fs.rmSync(singletonLockPath, { force: true });
             console.info("Removed SingletonLock");
         }
     } catch (e) {

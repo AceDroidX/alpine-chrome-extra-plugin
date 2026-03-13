@@ -1,18 +1,18 @@
 services:
   chrome:
-    image: acedroidx/alpine-chrome-extra-plugin
+    # image: acedroidx/alpine-chrome-extra-plugin:vnc
     container_name: chrome
     build:
       context: .
       args:
-        USE_CHINA_MIRROR: "false"
-        ENABLE_NOVNC: "false"
+        USE_CHINA_MIRROR: "true"
+        ENABLE_NOVNC: "true"
     volumes:
       - chrome-data:/app/puppeteer
     ports:
       - 9222:9222
       # Enable when build.args.ENABLE_NOVNC is "true"
-      # - 6080:6080
+      - 6080:6080
 
 volumes:
   chrome-data:

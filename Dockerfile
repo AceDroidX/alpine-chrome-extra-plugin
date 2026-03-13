@@ -5,6 +5,7 @@ FROM node:24-trixie-slim AS base
 ARG USE_CHINA_MIRROR
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=Asia/Shanghai \
+    APP_ROOT=/app \
     PUPPETEER_SKIP_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
 WORKDIR /app
@@ -20,9 +21,9 @@ RUN if [ "$USE_CHINA_MIRROR" = "true" ]; then \
     && rm -rf /var/lib/apt/lists/*
 
 FROM base AS build
-COPY pnpm-lock.yaml package.json ./
+COPY pnpm-lock.yaml package.json /app/
 RUN pnpm fetch --prod
-COPY . .
+COPY . /app/
 RUN pnpm install --offline --prod
 
 FROM base AS release
@@ -71,9 +72,9 @@ ENV CHROME_BIN=/usr/bin/google-chrome \
     CHROME_DEBUG_PORT=9221 \
     DEVTOOLS_PORT=9222
 
-COPY --chown=chrome:chrome --from=build /app/node_modules ./node_modules
-COPY --chown=chrome:chrome --from=build /app/index.ts ./index.ts
-COPY --chown=chrome:chrome --from=build /app/wrap.sh ./wrap.sh
+COPY --chown=chrome:chrome --from=build /app/node_modules /app/node_modules
+COPY --chown=chrome:chrome --from=build /app/index.ts /app/index.ts
+COPY --chown=chrome:chrome --from=build /app/wrap.sh /app/wrap.sh
 RUN sed -i 's/\r$//' /app/wrap.sh \
     && chmod 755 /app/wrap.sh
 

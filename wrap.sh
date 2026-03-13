@@ -2,6 +2,10 @@
 
 set -eu
 
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+APP_ROOT="${APP_ROOT:-$SCRIPT_DIR}"
+export APP_ROOT
+
 PIDS=""
 
 start_log_forwarder() {
@@ -60,5 +64,5 @@ PIDS="$PIDS $!"
 sleep 1
 require_running "$!" "socat"
 
-echo "Starting node index.ts"
-node index.ts
+echo "Starting node $APP_ROOT/index.ts"
+node "$APP_ROOT/index.ts"
