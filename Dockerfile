@@ -76,7 +76,11 @@ COPY --chown=chrome:chrome --from=build /app/node_modules /app/node_modules
 COPY --chown=chrome:chrome --from=build /app/index.ts /app/index.ts
 COPY --chown=chrome:chrome --from=build /app/wrap.sh /app/wrap.sh
 RUN sed -i 's/\r$//' /app/wrap.sh \
-    && chmod 755 /app/wrap.sh
+    && chmod 755 /app/wrap.sh \
+    && mkdir -p /home/chrome/.local/share \
+    && mkdir -p /home/chrome/.local/state \
+    && mkdir -p /home/chrome/.cache \
+    && mkdir -p /home/chrome/.config
 
 VOLUME /app/puppeteer
 EXPOSE 9222/tcp
