@@ -11,6 +11,7 @@ services:
       - chrome-data:/app/puppeteer
     ports:
       - 9222:9222
+      - 3000:3000
       # Enable when build.args.ENABLE_NOVNC is "true"
       - 6080:6080
 

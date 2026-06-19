@@ -70,7 +70,8 @@ ENV CHROME_BIN=/usr/bin/google-chrome \
     XVFB_SCREEN=0 \
     XVFB_WHD=1336x768x24 \
     CHROME_DEBUG_PORT=9221 \
-    DEVTOOLS_PORT=9222
+    DEVTOOLS_PORT=9222 \
+    HEALTH_PORT=3000
 
 COPY --chown=chrome:chrome --from=build /app/node_modules /app/node_modules
 COPY --chown=chrome:chrome --from=build /app/index.ts /app/index.ts
@@ -83,5 +84,7 @@ RUN sed -i 's/\r$//' /app/wrap.sh \
     && mkdir -p /home/chrome/.config
 
 VOLUME /app/puppeteer
-EXPOSE 9222/tcp
+EXPOSE 9222/tcp 3000/tcp
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:3000/healthz || exit 1
 ENTRYPOINT ["dumb-init", "--", "/app/wrap.sh"]
